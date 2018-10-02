@@ -17,14 +17,15 @@ import (
 
 func TestHTTP(t *testing.T) {
 	type testcase struct {
-		path    []string
-		v       interface{}
-		vs      []interface{}
-		file    files.File
-		r       string
-		err     error
-		sendErr error
-		wait    bool
+		path         []string
+		v            interface{}
+		vs           []interface{}
+		file         files.File
+		r            string
+		err          error
+		sendErr      error
+		wait         bool
+		expectHeader map[string]string
 	}
 
 	tcs := []testcase{
@@ -74,6 +75,9 @@ func TestHTTP(t *testing.T) {
 							Closer: nopCloser{},
 						}, nil)}),
 			vs: []interface{}{"i received:", "This is the body of the request!"},
+			expectHeader: map[string]string{
+				"Connection": "close",
+			},
 		},
 	}
 
@@ -201,6 +205,13 @@ func TestHTTP(t *testing.T) {
 				}
 			}
 
+			httpRes := res.(*Response)
+			for h, hexp := range tc.expectHeader {
+				hdr := httpRes.res.Header.Get(h)
+				if hdr != hexp {
+					t.Errorf("expected header %q to be %q but got %q", h, hexp, hdr)
+				}
+			}
 			wait, ok := getWaitChan(env)
 			if !ok {
 				t.Fatal("could not get wait chan")
