@@ -117,7 +117,7 @@ func parseRequest(ctx context.Context, r *http.Request, root *cmds.Command) (*cm
 	contentType := r.Header.Get(contentTypeHeader)
 	mediatype, _, _ := mime.ParseMediaType(contentType)
 
-	var f files.File
+	var f files.Directory
 	if mediatype == "multipart/form-data" {
 		reader, err := r.MultipartReader()
 		if err != nil {

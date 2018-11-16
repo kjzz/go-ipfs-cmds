@@ -119,12 +119,16 @@ func (c *client) toHTTPRequest(req *cmds.Request) (*http.Request, error) {
 	if bodyArgs := req.BodyArgs(); bodyArgs != nil {
 		// In the end, this wraps a file reader in a file reader.
 		// However, such is life.
-		fileReader = files.NewMultiFileReader(files.NewSliceFile([]files.FileEntry{
-			{File: files.NewReaderFile(bodyArgs, nil), Name: "stdin"},
-		}), true)
+		fileReader, err = files.NewMultiFileReader(files.NewSliceFile([]files.DirEntry{files.FileEntry("stdin", files.NewReaderFile(bodyArgs, nil))}), true)
+		if err != nil {
+			return nil, err
+		}
 		reader = fileReader
 	} else if req.Files != nil {
-		fileReader = files.NewMultiFileReader(req.Files, true)
+		fileReader, err = files.NewMultiFileReader(req.Files, true)
+		if err != nil {
+			return nil, err
+		}
 		reader = fileReader
 	}
 
